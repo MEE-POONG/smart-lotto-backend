@@ -1,23 +1,23 @@
-Smart-Lotto-Backend
+# Smart-Lotto-Backend
 
-Smart-Lotto-Backend is a scalable backend system for managing lottery operations, including customer management, order processing, and real-time updates. This backend is built with modern technologies to ensure efficiency and security in handling lottery transactions.
+   Smart-Lotto-Backend is a scalable backend system for managing lottery operations, including customer management, order processing, and real-time updates. This backend is built with modern technologies to ensure efficiency and security in handling lottery transactions.
 
 Key Features
 
- • Customer Management: Store and manage customer data, including order history.
- • Order Processing: Create, update, and manage lottery ticket orders with various lottery ticket types.
- • Real-time Notifications: Receive real-time updates on order statuses and lottery results via WebSockets.
- • Secure Authentication: JWT-based authentication ensures secure access and data handling.
- • Database Integration: Supports relational (PostgreSQL) databases.
+ - Customer Management: Store and manage customer data, including order history.
+ - Order Processing: Create, update, and manage lottery ticket orders with various lottery ticket types.
+ - Real-time Notifications: Receive real-time updates on order statuses and lottery results via WebSockets.
+ - Secure Authentication: JWT-based authentication ensures secure access and data handling.
+ - Database Integration: Supports relational (PostgreSQL) databases.
 
 Technology Stack
 
- • Backend Framework: NestJS
- • Database: PostgreSQL
- • ORM: Prisma for data management
- • Authentication: JWT for secure access
- • Real-time Communication: WebSockets for real-time updates
- • Deployment: Docker for containerization and CI/CD pipelines
+ - Backend Framework: NestJS
+ - Database: PostgreSQL
+ - ORM: Prisma for data management
+ - Authentication: JWT for secure access
+ - Real-time Communication: WebSockets for real-time updates
+ - Deployment: Docker for containerization and CI/CD pipelines
 
 Getting Started
 
