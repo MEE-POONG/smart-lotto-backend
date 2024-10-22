@@ -34,7 +34,7 @@ describe('CustomerController', () => {
   describe('getCustomerById', () => {
     it('should return a customer by ID', async () => {
       const mockCustomer = {
-        customer_id: '1',
+        customer_id: 1,
         customer_name: 'John Doe',
         customer_code: 'JD123',
         customer_email: 'john@example.com',
@@ -43,30 +43,30 @@ describe('CustomerController', () => {
         bank_name: 'Bank ABC',
         bank_account_no: '1234567890',
         bank_account_type: 'Savings',
-        enterprise_id: 'enterprise123',
-        last_modified_by: 'admin',
+        enterprise_id: 1,
+        last_modified_by: 1,
       };
       jest.spyOn(service, 'findCustomerById').mockResolvedValue(mockCustomer);
 
-      const result = await controller.getCustomerById('1');
+      const result = await controller.getCustomerById(1);
       expect(result).toEqual(mockCustomer);
-      expect(service.findCustomerById).toHaveBeenCalledWith('1');
+      expect(service.findCustomerById).toHaveBeenCalledWith(1);
     });
 
     it('should throw a NotFoundException if customer is not found', async () => {
       jest.spyOn(service, 'findCustomerById').mockResolvedValue(null);
 
-      await expect(controller.getCustomerById('1')).rejects.toThrow(
+      await expect(controller.getCustomerById(1)).rejects.toThrow(
         NotFoundException,
       );
-      expect(service.findCustomerById).toHaveBeenCalledWith('1');
+      expect(service.findCustomerById).toHaveBeenCalledWith(1);
     });
   });
 
   describe('createCustomer', () => {
     it('should create a new customer', async () => {
       const mockCustomer = {
-        customer_id: '1',
+        customer_id: 1,
         customer_name: 'John Doe',
         customer_code: 'JD123',
         customer_email: 'john@example.com',
@@ -75,8 +75,8 @@ describe('CustomerController', () => {
         bank_name: 'Bank ABC',
         bank_account_no: '1234567890',
         bank_account_type: 'Savings',
-        enterprise_id: 'enterprise123',
-        last_modified_by: 'admin',
+        enterprise_id: 1,
+        last_modified_by: 1,
       };
       jest.spyOn(service, 'createCustomer').mockResolvedValue(mockCustomer);
 
@@ -87,15 +87,15 @@ describe('CustomerController', () => {
       };
       const result = await controller.createCustomer(
         customerData,
-        'user123',
-        'enterprise123',
+        1,
+        1,
       );
 
       expect(result).toEqual(mockCustomer);
       expect(service.createCustomer).toHaveBeenCalledWith(
         customerData,
-        'user123',
-        'enterprise123',
+        1,
+        1,
       );
     });
   });
@@ -103,7 +103,7 @@ describe('CustomerController', () => {
   describe('updateCustomer', () => {
     it('should update a customer', async () => {
       const mockUpdatedCustomer = {
-        customer_id: '1',
+        customer_id: 1,
         customer_name: 'John Smith',
         customer_code: 'JS123',
         customer_email: 'johnsmith@example.com',
@@ -112,8 +112,8 @@ describe('CustomerController', () => {
         bank_name: 'Bank XYZ',
         bank_account_no: '9876543210',
         bank_account_type: 'Checking',
-        enterprise_id: 'enterprise456',
-        last_modified_by: 'admin',
+        enterprise_id: 2,
+        last_modified_by: 1,
       };
       jest
         .spyOn(service, 'updateCustomer')
@@ -125,18 +125,18 @@ describe('CustomerController', () => {
         email: 'johnsmith@example.com',
       };
       const result = await controller.updateCustomer(
-        '1',
+        1,
         updateData,
-        'user123',
-        'enterprise123',
+        1,
+        1,
       );
 
       expect(result).toEqual(mockUpdatedCustomer);
       expect(service.updateCustomer).toHaveBeenCalledWith(
-        '1',
+        1,
         updateData,
-        'user123',
-        'enterprise123',
+        1,
+        1,
       );
     });
   });
@@ -146,16 +146,16 @@ describe('CustomerController', () => {
       jest.spyOn(service, 'deleteCustomer').mockResolvedValue(true);
 
       const result = await controller.deleteCustomer(
-        '1',
-        'user123',
-        'enterprise123',
+        1,
+        1,
+        1,
       );
 
       expect(result).toEqual({ message: 'Customer deleted successfully' });
       expect(service.deleteCustomer).toHaveBeenCalledWith(
-        '1',
-        'user123',
-        'enterprise123',
+        1,
+        1,
+        1,
       );
     });
   });

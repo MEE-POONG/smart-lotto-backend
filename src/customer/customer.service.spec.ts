@@ -38,7 +38,7 @@ describe('CustomerService', () => {
   describe('findCustomerById', () => {
     it('should return a customer if found', async () => {
       const mockCustomer = {
-        customer_id: '1',
+        customer_id: 1,
         customer_name: 'John Doe',
         customer_code: 'JD123',
         customer_email: 'john@example.com',
@@ -47,25 +47,25 @@ describe('CustomerService', () => {
         bank_name: 'Bank ABC',
         bank_account_no: '1234567890',
         bank_account_type: 'Savings',
-        enterprise_id: 'enterprise123',
-        last_modified_by: 'admin',
+        enterprise_id: 1,
+        last_modified_by: 1,
       };
       jest.spyOn(prisma.customer, 'findUnique').mockResolvedValue(mockCustomer);
 
-      const result = await service.findCustomerById('1');
+      const result = await service.findCustomerById(1);
       expect(result).toEqual(mockCustomer);
       expect(prisma.customer.findUnique).toHaveBeenCalledWith({
-        where: { customer_id: '1' },
+        where: { customer_id: 1 },
       });
     });
 
     it('should return null if customer is not found', async () => {
       jest.spyOn(prisma.customer, 'findUnique').mockResolvedValue(null);
 
-      const result = await service.findCustomerById('1');
+      const result = await service.findCustomerById(1);
       expect(result).toBeNull();
       expect(prisma.customer.findUnique).toHaveBeenCalledWith({
-        where: { customer_id: '1' },
+        where: { customer_id: 1 },
       });
     });
   });
@@ -73,7 +73,7 @@ describe('CustomerService', () => {
   describe('createCustomer', () => {
     it('should create and return a new customer', async () => {
       const mockCustomer = {
-        customer_id: '1',
+        customer_id: 1,
         customer_name: 'John Doe',
         customer_code: 'JD123',
         customer_email: 'john@example.com',
@@ -82,8 +82,8 @@ describe('CustomerService', () => {
         bank_name: 'Bank ABC',
         bank_account_no: '1234567890',
         bank_account_type: 'Savings',
-        enterprise_id: 'enterprise123',
-        last_modified_by: 'admin',
+        enterprise_id: 1,
+        last_modified_by: 1,
       };
       jest.spyOn(prisma.customer, 'create').mockResolvedValue(mockCustomer);
       jest.spyOn(prisma.changeLog, 'create').mockResolvedValue({
@@ -91,18 +91,18 @@ describe('CustomerService', () => {
         after_data: mockCustomer,
         before_data: null,
         change_time: new Date(),
-        enterprise_id: 'enterprise123',
-        entity_id: '1',
+        enterprise_id: 1,
+        entity_id: 1,
         entity_name: 'Customer',
-        user_id: 'user123',
+        user_id: 1,
         log_id: 1,
-        last_modified_by: 'admin',
+        last_modified_by: 1,
       }); // Mock the log creation
 
       const result = await service.createCustomer(
         { name: 'John Doe', code: 'JD123', email: 'john@example.com' },
-        'user123',
-        'enterprise123',
+        1,
+        1,
       );
       expect(result).toEqual(mockCustomer);
       expect(prisma.customer.create).toHaveBeenCalledWith({
@@ -110,7 +110,7 @@ describe('CustomerService', () => {
           customer_name: 'John Doe',
           customer_code: 'JD123', // Fixed the customer_code
           customer_email: 'john@example.com',
-          enterprise_id: 'enterprise123',
+          enterprise_id: 1,
         },
       });
     });
@@ -119,7 +119,7 @@ describe('CustomerService', () => {
   describe('updateCustomer', () => {
     it('should update and return an existing customer', async () => {
       const mockUpdatedCustomer = {
-        customer_id: '1',
+        customer_id: 1,
         customer_name: 'John Smith',
         customer_code: 'John Smith',
         customer_email: 'john@example.com',
@@ -128,8 +128,8 @@ describe('CustomerService', () => {
         bank_name: 'Bank ABC',
         bank_account_no: '1234567890',
         bank_account_type: 'Savings',
-        enterprise_id: 'enterprise123',
-        last_modified_by: 'admin',
+        enterprise_id: 1,
+        last_modified_by: 1,
       };
       jest
         .spyOn(prisma.customer, 'update')
@@ -140,23 +140,23 @@ describe('CustomerService', () => {
         after_data: mockUpdatedCustomer,
         before_data: null,
         change_time: new Date(),
-        enterprise_id: 'enterprise123',
-        entity_id: '1',
+        enterprise_id: 1,
+        entity_id: 1,
         entity_name: 'Customer',
-        user_id: 'user123',
+        user_id: 1,
         log_id: 1,
-        last_modified_by: 'admin',
+        last_modified_by: 1,
       }); // Mock the log creation
 
       const result = await service.updateCustomer(
-        '1',
+        1,
         { name: 'John Smith', email: 'john@example.com' },
-        'user123',
-        'enterprise123',
+        1,
+        1,
       );
       expect(result).toEqual(mockUpdatedCustomer);
       expect(prisma.customer.update).toHaveBeenCalledWith({
-        where: { customer_id: '1' },
+        where: { customer_id: 1 },
         data: {
           customer_name: 'John Smith',
           customer_email: 'john@example.com',
@@ -167,7 +167,7 @@ describe('CustomerService', () => {
   describe('deleteCustomer', () => {
     it('should delete a customer and return true', async () => {
       const mockCustomer = {
-        customer_id: '1',
+        customer_id: 1,
         customer_name: 'John Doe',
         customer_code: 'JD123',
         customer_email: 'john@example.com',
@@ -176,8 +176,8 @@ describe('CustomerService', () => {
         bank_name: 'Bank ABC',
         bank_account_no: '1234567890',
         bank_account_type: 'Savings',
-        enterprise_id: 'enterprise123',
-        last_modified_by: 'admin',
+        enterprise_id: 1,
+        last_modified_by: 1,
       };
 
       jest.spyOn(prisma.customer, 'delete').mockResolvedValue(mockCustomer);
@@ -186,23 +186,23 @@ describe('CustomerService', () => {
         after_data: mockCustomer,
         before_data: null,
         change_time: new Date(),
-        enterprise_id: 'enterprise123',
-        entity_id: '1',
+        enterprise_id: 1,
+        entity_id: 1,
         entity_name: 'Customer',
-        user_id: 'user123',
+        user_id: 1,
         log_id: 1,
-        last_modified_by: 'admin',
+        last_modified_by: 1,
       }); // Mock the log creation
 
       const result = await service.deleteCustomer(
-        '1',
-        'user123',
-        'enterprise123',
+        1,
+        1,
+        1,
       );
 
       expect(result).toEqual(true);
       expect(prisma.customer.delete).toHaveBeenCalledWith({
-        where: { customer_id: '1' },
+        where: { customer_id: 1 },
       });
     });
   });

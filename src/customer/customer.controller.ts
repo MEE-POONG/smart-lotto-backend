@@ -16,8 +16,8 @@ export class CustomerController {
 
   // Fetch a customer by ID
   @Get(':id')
-  async getCustomerById(@Param('id') id: string) {
-    const customer = await this.customerService.findCustomerById(id);
+  async getCustomerById(@Param('id') id: number) {
+    const customer = await this.customerService.findCustomerById(Number(id));
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found`);
     }
@@ -27,30 +27,30 @@ export class CustomerController {
   // Create a new customer
   @Post()
   async createCustomer(
-    @Body() customerData: { name: string; code: string, email: string },
-    @Body('userId') userId: string,
-    @Body('enterpriseId') enterpriseId: string,
+    @Body() customerData: { name: string; code: string; email: string },
+    @Body('userId') userId: number,
+    @Body('enterpriseId') enterpriseId: number,
   ) {
     return this.customerService.createCustomer(
       customerData,
-      userId,
-      enterpriseId,
+      Number(userId),
+      Number(enterpriseId),
     );
   }
 
   // Update an existing customer
   @Put(':id')
   async updateCustomer(
-    @Param('id') id: string,
+    @Param('id') id: number,
     @Body() customerData: { name?: string; email?: string },
-    @Body('userId') userId: string,
-    @Body('enterpriseId') enterpriseId: string,
+    @Body('userId') userId: number,
+    @Body('enterpriseId') enterpriseId: number,
   ) {
     const updatedCustomer = await this.customerService.updateCustomer(
-      id,
+      Number(id),
       customerData,
-      userId,
-      enterpriseId,
+      Number(userId),
+      Number(enterpriseId),
     );
     if (!updatedCustomer) {
       throw new NotFoundException(`Customer with ID ${id} not found`);
@@ -61,14 +61,14 @@ export class CustomerController {
   // Delete a customer by ID
   @Delete(':id')
   async deleteCustomer(
-    @Param('id') id: string,
-    @Body('userId') userId: string,
-    @Body('enterpriseId') enterpriseId: string,
+    @Param('id') id: number,
+    @Body('userId') userId: number,
+    @Body('enterpriseId') enterpriseId: number,
   ) {
     const success = await this.customerService.deleteCustomer(
-      id,
-      userId,
-      enterpriseId,
+      Number(id),
+      Number(userId),
+      Number(enterpriseId),
     );
     if (!success) {
       throw new NotFoundException(`Customer with ID ${id} not found`);

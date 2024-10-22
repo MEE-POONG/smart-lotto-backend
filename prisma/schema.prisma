@@ -9,7 +9,7 @@ generator client {
 
 /// The `User` model represents the system users who modify records.
 model User {
-  user_id    String @id @default(uuid()) @db.VarChar(36) /// Unique identifier for each user.
+  user_id    Int    @id @default(autoincrement()) /// Unique identifier for each user.
   user_name  String @db.VarChar(100) /// The name of the user.
   user_email String @unique @db.VarChar(100) /// The email of the user.
 
@@ -24,7 +24,7 @@ model User {
 
 /// The `Enterprise` model represents an individual enterprise (or tenant) in the system.
 model Enterprise {
-  enterprise_id   String @id @default(uuid()) @db.VarChar(36) /// Unique identifier for each enterprise.
+  enterprise_id   Int    @id @default(autoincrement()) /// Unique identifier for each enterprise.
   enterprise_name String @db.VarChar(100) /// The name of the enterprise.
 
   // Relation fields
@@ -38,9 +38,9 @@ model Enterprise {
 
 /// The `Customer` model represents individual customers linked to a specific enterprise.
 model Customer {
-  customer_id      String  @id @default(uuid()) @db.VarChar(10) /// Unique identifier for the customer.
+  customer_id      Int     @id @default(autoincrement()) /// Unique identifier for the customer.
   customer_name    String  @db.VarChar(100) /// The customer's full name.
-  customer_code    String  @unique @db.VarChar(10) /// Unique customer code used in the system.
+  customer_code    String  @unique @db.VarChar(100) /// Unique customer code used in the system.
   customer_email   String? @db.VarChar(100) /// The customer's email (nullable).
   customer_phone   String? @db.VarChar(15) /// The customer's phone number (nullable).
   customer_address String? @db.VarChar(255) /// The customer's full address (nullable).
@@ -50,8 +50,8 @@ model Customer {
   bank_account_no   String? @db.VarChar(30) /// The customer's bank account number (nullable).
   bank_account_type String? @db.VarChar(50) /// The type of bank account (e.g., Savings, Checking) (nullable).
 
-  enterprise_id    String  @db.VarChar(36) /// Foreign key to the enterprise that owns this customer.
-  last_modified_by String? @db.VarChar(36) /// Foreign key to the user who last modified this record.
+  enterprise_id    Int /// Foreign key to the enterprise that owns this customer.
+  last_modified_by Int? /// Foreign key to the user who last modified this record.
 
   // Relations
   enterprise     Enterprise @relation(fields: [enterprise_id], references: [enterprise_id]) /// Each customer belongs to one enterprise.
@@ -61,15 +61,15 @@ model Customer {
 
 /// The `Order` model represents individual orders placed by customers within an enterprise.
 model Order {
-  order_id         String   @id @default(uuid()) @db.VarChar(10) /// Unique identifier for each order.
-  customer_id      String   @db.VarChar(10) /// Foreign key relating to the customer who placed the order.
+  order_id         Int      @id @default(autoincrement()) /// Unique identifier for each order.
+  customer_id      Int /// Foreign key relating to the customer who placed the order.
   total_price      Decimal  @db.Decimal(10, 2) /// The total price of the order.
   order_date       DateTime /// The date and time the order was placed.
   order_status     String   @default("Pending") @db.VarChar(20) /// The current status of the order (Pending, Shipped, Delivered).
   payment_status   String   @default("Unpaid") @db.VarChar(20) /// The payment status of the order (Paid, Unpaid).
   pay_slip_image   String?  @db.VarChar(255) /// The link or path to the payment slip image (nullable).
-  enterprise_id    String   @db.VarChar(36) /// Foreign key to the enterprise that owns this order.
-  last_modified_by String?  @db.VarChar(36) /// Foreign key to the user who last modified this record.
+  enterprise_id    Int /// Foreign key to the enterprise that owns this order.
+  last_modified_by Int? /// Foreign key to the user who last modified this record.
 
   // Relations
   customer       Customer    @relation(fields: [customer_id], references: [customer_id]) /// Each order belongs to one customer.
@@ -82,13 +82,13 @@ model Order {
 /// The `OrderItem` model represents individual items within an order, linked to an enterprise.
 model OrderItem {
   order_item_id    Int     @id @default(autoincrement()) /// Unique identifier for each order item.
-  order_id         String  @db.VarChar(10) /// Foreign key relating to the order this item belongs to.
+  order_id         Int /// Foreign key relating to the order this item belongs to.
   number_value     String  @db.VarChar(10) /// The lottery number selected by the customer.
   item_type_id     Int /// Foreign key relating to the type of lottery item.
   quantity         Int     @default(1) /// The quantity of this item ordered.
   price            Decimal @db.Decimal(10, 2) /// The price for this item.
-  enterprise_id    String  @db.VarChar(36) /// Foreign key to the enterprise that owns this order item.
-  last_modified_by String? @db.VarChar(36) /// Foreign key to the user who last modified this record.
+  enterprise_id    Int /// Foreign key to the enterprise that owns this order item.
+  last_modified_by Int? /// Foreign key to the user who last modified this record.
 
   // Relations
   order          Order      @relation(fields: [order_id], references: [order_id]) /// Many order items belong to one order.
@@ -99,10 +99,10 @@ model OrderItem {
 
 /// The `ItemType` model represents different types of lottery items, specific to each enterprise.
 model ItemType {
-  item_type_id     Int     @id @default(autoincrement()) /// Unique identifier for the item type.
-  type_name        String  @unique @db.VarChar(50) /// The name of the item type (e.g., 2 ตัวบน, 2 ตัวล่าง).
-  enterprise_id    String  @db.VarChar(36) /// Foreign key to the enterprise that owns this item type.
-  last_modified_by String? @db.VarChar(36) /// Foreign key to the user who last modified this record.
+  item_type_id     Int    @id @default(autoincrement()) /// Unique identifier for the item type.
+  type_name        String @unique @db.VarChar(50) /// The name of the item type (e.g., 2 ตัวบน, 2 ตัวล่าง).
+  enterprise_id    Int /// Foreign key to the enterprise that owns this item type.
+  last_modified_by Int? /// Foreign key to the user who last modified this record.
 
   // Relations
   order_items    OrderItem[] /// One item type can belong to multiple order items.
@@ -114,11 +114,11 @@ model ItemType {
 model QuickNote {
   note_id          Int      @id @default(autoincrement()) /// Unique identifier for the quick note.
   note_description String   @db.Text /// The description of the quick note.
-  order_id         String   @db.VarChar(10) /// Foreign key relating to the order this note belongs to.
+  order_id         Int /// Foreign key relating to the order this note belongs to.
   created_at       DateTime @default(now()) /// Timestamp for when the note was created.
   updated_at       DateTime @updatedAt /// Timestamp for when the note was last updated.
-  enterprise_id    String   @db.VarChar(36) /// Foreign key to the enterprise that owns this quick note.
-  last_modified_by String?  @db.VarChar(36) /// Foreign key to the user who last modified this record.
+  enterprise_id    Int /// Foreign key to the enterprise that owns this quick note.
+  last_modified_by Int? /// Foreign key to the user who last modified this record.
 
   // Relations
   order          Order      @relation(fields: [order_id], references: [order_id]) /// Many quick notes belong to one order.
@@ -131,13 +131,13 @@ model ChangeLog {
   log_id           Int      @id @default(autoincrement()) /// Unique identifier for each log entry.
   entity_name      String   @db.VarChar(50) /// The name of the entity being changed (e.g., Customer, Order).
   action           String   @db.VarChar(20) /// The type of action performed (create, update, delete).
-  entity_id        String   @db.VarChar(50) /// The ID of the entity that was changed.
-  user_id          String?  @db.VarChar(50) /// The ID of the user who performed the action (optional).
+  entity_id        Int /// The ID of the entity that was changed.
+  user_id          Int? /// The ID of the user who performed the action (optional).
   before_data      Json? /// JSON object containing the data before the change (nullable).
   after_data       Json? /// JSON object containing the data after the change (nullable).
   change_time      DateTime @default(now()) /// Timestamp of when the change was made.
-  enterprise_id    String   @db.VarChar(36) /// The enterprise to which this change log belongs.
-  last_modified_by String?  @db.VarChar(36) /// Foreign key to the user who last modified this record.
+  enterprise_id    Int /// The enterprise to which this change log belongs.
+  last_modified_by Int? /// Foreign key to the user who last modified this record.
 
   // Relations
   enterprise     Enterprise @relation(fields: [enterprise_id], references: [enterprise_id]) /// Each change log belongs to one enterprise.
