@@ -10,7 +10,7 @@ export class CustomerService {
    * @param customerId - The unique ID of the customer.
    * @returns The customer data if found, or null if not found.
    */
-  async findCustomerById(customerId: string) {
+  async findCustomerById(customerId: number) {
     return this.prisma.customer.findUnique({
       where: { customer_id: customerId }, // Assumes the ID field is 'customer_id' in the database
     });
@@ -18,8 +18,8 @@ export class CustomerService {
 
   async createCustomer(
     data: { name: string; code: string; email: string },
-    userId: string,
-    enterpriseId: string,
+    userId: number,
+    enterpriseId: number,
   ) {
     const customer = await this.prisma.customer.create({
       data: {
@@ -46,10 +46,10 @@ export class CustomerService {
   }
 
   async updateCustomer(
-    customerId: string,
+    customerId: number,
     data: { name?: string; email?: string },
-    userId: string,
-    enterpriseId: string,
+    userId: number,
+    enterpriseId: number,
   ) {
     // Fetch the current data before update
     const beforeData = await this.prisma.customer.findUnique({
@@ -81,9 +81,9 @@ export class CustomerService {
   }
 
   async deleteCustomer(
-    customerId: string,
-    userId: string,
-    enterpriseId: string,
+    customerId: number,
+    userId: number,
+    enterpriseId: number,
   ) {
     // Fetch the current data before delete
     const customer = await this.prisma.customer.findUnique({

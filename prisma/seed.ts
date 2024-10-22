@@ -6,14 +6,12 @@ async function main() {
   // Seed data for Enterprise
   const enterprise1 = await prisma.enterprise.create({
     data: {
-      enterprise_id: 'enterprise-id-1',
       enterprise_name: 'Smart Lotto Thailand',
     },
   });
 
   const enterprise2 = await prisma.enterprise.create({
     data: {
-      enterprise_id: 'enterprise-id-2',
       enterprise_name: 'Smart Lotto International',
     },
   });
@@ -21,7 +19,6 @@ async function main() {
   // Seed data for User
   const user1 = await prisma.user.create({
     data: {
-      user_id: 'user-id-1',
       user_name: 'Admin User',
       user_email: 'admin@example.com',
     },
@@ -29,7 +26,6 @@ async function main() {
 
   const user2 = await prisma.user.create({
     data: {
-      user_id: 'user-id-2',
       user_name: 'Manager User',
       user_email: 'manager@example.com',
     },
