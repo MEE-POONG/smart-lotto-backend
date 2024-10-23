@@ -1,8 +1,26 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
+import * as jwt from 'jsonwebtoken';
 
 const prisma = new PrismaClient();
 
+/**
+ * This function is for seeding the initial data in the database.
+ * It includes data for Enterprise, User, and ItemType.
+ * The data is hardcoded in this function.
+ * The function is called in the main function and it will be executed
+ * when the application is started.
+ */
 async function main() {
+  // Hash the password before saving to the database
+  async function hashPassword(password: string): Promise<string> {
+    const salt = await bcrypt.genSalt();
+    return bcrypt.hash(password, salt);
+  }
+
+  const password = '123456';
+  const hashedPassword = await hashPassword(password);
+
   // Seed data for Enterprise
   const enterprise1 = await prisma.enterprise.create({
     data: {
@@ -20,6 +38,7 @@ async function main() {
   const user1 = await prisma.user.create({
     data: {
       user_name: 'Admin User',
+      password: hashedPassword,
       user_email: 'admin@example.com',
     },
   });
@@ -27,6 +46,7 @@ async function main() {
   const user2 = await prisma.user.create({
     data: {
       user_name: 'Manager User',
+      password: hashedPassword,
       user_email: 'manager@example.com',
     },
   });

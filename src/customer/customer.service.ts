@@ -6,6 +6,14 @@ export class CustomerService {
   constructor(private prisma: PrismaService) {}
 
   /**
+   * Find all customers.
+   * @returns The list of all customers.
+   */
+  async findAll() {
+    return this.prisma.customer.findMany();
+  }
+
+  /**
    * Find a customer by their ID.
    * @param customerId - The unique ID of the customer.
    * @returns The customer data if found, or null if not found.

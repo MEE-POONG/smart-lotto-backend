@@ -9,17 +9,23 @@ generator client {
 
 /// The `User` model represents the system users who modify records.
 model User {
-  user_id    Int    @id @default(autoincrement()) /// Unique identifier for each user.
-  user_name  String @db.VarChar(100) /// The name of the user.
-  user_email String @unique @db.VarChar(100) /// The email of the user.
+  user_id       Int     @id @default(autoincrement()) /// Unique identifier for each user.
+  user_name     String  @db.VarChar(100) /// The name of the user.
+  user_email    String  @unique @db.VarChar(100) /// The email of the user.
+  password      String  @db.VarChar(255) /// The password hash for the user.
+  refresh_token String? @db.VarChar(255) /// Optional refresh token for session management.
 
   // Relations
-  customers  Customer[]  @relation("CustomerLastModifiedBy") // Customers modified by this user
-  orders     Order[]     @relation("OrderLastModifiedBy") // Orders modified by this user
-  orderItems OrderItem[] @relation("OrderItemLastModifiedBy") // OrderItems modified by this user
-  itemTypes  ItemType[]  @relation("ItemTypeLastModifiedBy") // ItemTypes modified by this user
-  quickNotes QuickNote[] @relation("QuickNoteLastModifiedBy") // QuickNotes modified by this user
-  changeLogs ChangeLog[] @relation("ChangeLogLastModifiedBy") // ChangeLogs modified by this user
+  customers  Customer[]  @relation("CustomerLastModifiedBy")
+  orders     Order[]     @relation("OrderLastModifiedBy")
+  orderItems OrderItem[] @relation("OrderItemLastModifiedBy")
+  itemTypes  ItemType[]  @relation("ItemTypeLastModifiedBy")
+  quickNotes QuickNote[] @relation("QuickNoteLastModifiedBy")
+  changeLogs ChangeLog[] @relation("ChangeLogLastModifiedBy")
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 /// The `Enterprise` model represents an individual enterprise (or tenant) in the system.
