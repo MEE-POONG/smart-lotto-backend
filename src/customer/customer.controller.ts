@@ -9,12 +9,24 @@ import {
   NotFoundException,
   BadRequestException,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('customers')
+@UseGuards(JwtAuthGuard)
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
+
+  /**
+   * Fetch all customers.
+   * @returns A list of all customers.
+   */
+  @Get()
+  async getAllCustomers() {
+    return this.customerService.findAll();
+  }
 
   /**
    * Fetch a customer by ID
