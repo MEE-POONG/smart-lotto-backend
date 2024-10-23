@@ -7,6 +7,8 @@ import {
   Put,
   Delete,
   NotFoundException,
+  BadRequestException,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CustomerService } from './customer.service';
 
@@ -14,65 +16,99 @@ import { CustomerService } from './customer.service';
 export class CustomerController {
   constructor(private readonly customerService: CustomerService) {}
 
-  // Fetch a customer by ID
+  /**
+   * Fetch a customer by ID
+   * @param id - The customer ID passed as a route parameter
+   * @returns The customer data if found, throws NotFoundException if not
+   */
   @Get(':id')
-  async getCustomerById(@Param('id') id: number) {
-    const customer = await this.customerService.findCustomerById(Number(id));
+  async getCustomerById(@Param('id', ParseIntPipe) id: number) {
+    const customer = await this.customerService.findCustomerById(id);
     if (!customer) {
       throw new NotFoundException(`Customer with ID ${id} not found`);
     }
     return customer;
   }
 
-  // Create a new customer
+  /**
+   * Create a new customer
+   * @param customerData - The customer data passed in the request body
+   * @param userId - The user ID passed in the request body
+   * @param enterpriseId - The enterprise ID passed in the request body
+   * @returns The created customer data
+   */
   @Post()
   async createCustomer(
     @Body() customerData: { name: string; code: string; email: string },
-    @Body('userId') userId: number,
-    @Body('enterpriseId') enterpriseId: number,
+    @Body('userId', ParseIntPipe) userId: number,
+    @Body('enterpriseId', ParseIntPipe) enterpriseId: number,
   ) {
+    if (!customerData.name || !customerData.code || !customerData.email) {
+      throw new BadRequestException('Missing required customer data');
+    }
+
     return this.customerService.createCustomer(
       customerData,
-      Number(userId),
-      Number(enterpriseId),
+      userId,
+      enterpriseId,
     );
   }
 
-  // Update an existing customer
+  /**
+   * Update an existing customer
+   * @param id - The customer ID passed as a route parameter
+   * @param customerData - The customer data to update, passed in the request body
+   * @param userId - The user ID passed in the request body
+   * @param enterpriseId - The enterprise ID passed in the request body
+   * @returns The updated customer data if found, throws NotFoundException if not
+   */
   @Put(':id')
   async updateCustomer(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() customerData: { name?: string; email?: string },
-    @Body('userId') userId: number,
-    @Body('enterpriseId') enterpriseId: number,
+    @Body('userId', ParseIntPipe) userId: number,
+    @Body('enterpriseId', ParseIntPipe) enterpriseId: number,
   ) {
+    if (!customerData.name && !customerData.email) {
+      throw new BadRequestException('Nothing to update');
+    }
+
     const updatedCustomer = await this.customerService.updateCustomer(
-      Number(id),
+      id,
       customerData,
-      Number(userId),
-      Number(enterpriseId),
+      userId,
+      enterpriseId,
     );
+
     if (!updatedCustomer) {
       throw new NotFoundException(`Customer with ID ${id} not found`);
     }
+
     return updatedCustomer;
   }
 
-  // Delete a customer by ID
+  /**
+   * Delete a customer by ID
+   * @param id - The customer ID passed as a route parameter
+   * @param userId - The user ID passed in the request body
+   * @param enterpriseId - The enterprise ID passed in the request body
+   * @returns Success message if deleted, throws NotFoundException if not
+   */
   @Delete(':id')
   async deleteCustomer(
-    @Param('id') id: number,
-    @Body('userId') userId: number,
-    @Body('enterpriseId') enterpriseId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body('userId', ParseIntPipe) userId: number,
+    @Body('enterpriseId', ParseIntPipe) enterpriseId: number,
   ) {
     const success = await this.customerService.deleteCustomer(
-      Number(id),
-      Number(userId),
-      Number(enterpriseId),
+      id,
+      userId,
+      enterpriseId,
     );
     if (!success) {
       throw new NotFoundException(`Customer with ID ${id} not found`);
     }
+
     return { message: 'Customer deleted successfully' };
   }
 }

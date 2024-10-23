@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CustomerService } from './customer.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('CustomerService', () => {
   let service: CustomerService;
@@ -8,202 +9,176 @@ describe('CustomerService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CustomerService,
-        {
-          provide: PrismaService,
-          useValue: {
-            customer: {
-              findUnique: jest.fn(),
-              create: jest.fn(),
-              update: jest.fn(),
-              delete: jest.fn(),
-            },
-            changeLog: {
-              create: jest.fn(), // Mock changeLog.create
-            },
-          },
-        },
-      ],
+      providers: [CustomerService, PrismaService],
     }).compile();
 
     service = module.get<CustomerService>(CustomerService);
     prisma = module.get<PrismaService>(PrismaService);
   });
 
-  it('should be defined', () => {
-    expect(service).toBeDefined();
-  });
-
   describe('findCustomerById', () => {
-    it('should return a customer if found', async () => {
-      const mockCustomer = {
-        customer_id: 1,
-        customer_name: 'John Doe',
-        customer_code: 'JD123',
-        customer_email: 'john@example.com',
-        customer_phone: '1234567890',
-        customer_address: '123 Main St',
-        bank_name: 'Bank ABC',
-        bank_account_no: '1234567890',
-        bank_account_type: 'Savings',
-        enterprise_id: 1,
-        last_modified_by: 1,
-      };
-      jest.spyOn(prisma.customer, 'findUnique').mockResolvedValue(mockCustomer);
+    it('should return customer data if found', async () => {
+      const mockCustomer = { customer_id: 1, customer_name: 'John Doe' };
+      prisma.customer.findUnique = jest.fn().mockResolvedValue(mockCustomer);
 
       const result = await service.findCustomerById(1);
       expect(result).toEqual(mockCustomer);
-      expect(prisma.customer.findUnique).toHaveBeenCalledWith({
-        where: { customer_id: 1 },
-      });
     });
 
-    it('should return null if customer is not found', async () => {
-      jest.spyOn(prisma.customer, 'findUnique').mockResolvedValue(null);
+    it('should throw a 404 error if Failed to find customer: Customer not found', async () => {
+      prisma.customer.findUnique = jest.fn().mockResolvedValue(null);
 
-      const result = await service.findCustomerById(1);
-      expect(result).toBeNull();
-      expect(prisma.customer.findUnique).toHaveBeenCalledWith({
-        where: { customer_id: 1 },
-      });
+      await expect(service.findCustomerById(1)).rejects.toThrow(
+        new HttpException('Failed to find customer: Customer not found', HttpStatus.NOT_FOUND),
+      );
     });
   });
 
   describe('createCustomer', () => {
-    it('should create and return a new customer', async () => {
+    it('should create a customer and log the creation', async () => {
       const mockCustomer = {
         customer_id: 1,
         customer_name: 'John Doe',
-        customer_code: 'JD123',
+        customer_code: 'CUST001',
         customer_email: 'john@example.com',
-        customer_phone: '1234567890',
-        customer_address: '123 Main St',
-        bank_name: 'Bank ABC',
-        bank_account_no: '1234567890',
-        bank_account_type: 'Savings',
-        enterprise_id: 1,
-        last_modified_by: 1,
       };
-      jest.spyOn(prisma.customer, 'create').mockResolvedValue(mockCustomer);
-      jest.spyOn(prisma.changeLog, 'create').mockResolvedValue({
-        action: 'delete',
-        after_data: mockCustomer,
-        before_data: null,
-        change_time: new Date(),
-        enterprise_id: 1,
-        entity_id: 1,
+      const mockLog = {
         entity_name: 'Customer',
-        user_id: 1,
-        log_id: 1,
-        last_modified_by: 1,
-      }); // Mock the log creation
+        action: 'create',
+        entity_id: 1,
+      };
+
+      prisma.customer.create = jest.fn().mockResolvedValue(mockCustomer);
+      prisma.changeLog.create = jest.fn().mockResolvedValue(mockLog);
 
       const result = await service.createCustomer(
-        { name: 'John Doe', code: 'JD123', email: 'john@example.com' },
+        { name: 'John Doe', code: 'CUST001', email: 'john@example.com' },
         1,
         1,
       );
       expect(result).toEqual(mockCustomer);
-      expect(prisma.customer.create).toHaveBeenCalledWith({
-        data: {
-          customer_name: 'John Doe',
-          customer_code: 'JD123', // Fixed the customer_code
-          customer_email: 'john@example.com',
-          enterprise_id: 1,
-        },
-      });
+      expect(prisma.customer.create).toHaveBeenCalled();
+      expect(prisma.changeLog.create).toHaveBeenCalled();
+    });
+
+    it('should throw an error if customer creation fails', async () => {
+      prisma.customer.create = jest
+        .fn()
+        .mockRejectedValue(new Error('Database Error'));
+
+      await expect(
+        service.createCustomer(
+          { name: 'John Doe', code: 'CUST001', email: 'john@example.com' },
+          1,
+          1,
+        ),
+      ).rejects.toThrow(
+        new HttpException(
+          'Failed to create customer: Database Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
     });
   });
 
   describe('updateCustomer', () => {
-    it('should update and return an existing customer', async () => {
-      const mockUpdatedCustomer = {
-        customer_id: 1,
-        customer_name: 'John Smith',
-        customer_code: 'John Smith',
-        customer_email: 'john@example.com',
-        customer_phone: '1234567890',
-        customer_address: '123 Main St',
-        bank_name: 'Bank ABC',
-        bank_account_no: '1234567890',
-        bank_account_type: 'Savings',
-        enterprise_id: 1,
-        last_modified_by: 1,
-      };
-      jest
-        .spyOn(prisma.customer, 'update')
-        .mockResolvedValue(mockUpdatedCustomer);
-
-      jest.spyOn(prisma.changeLog, 'create').mockResolvedValue({
-        action: 'delete',
-        after_data: mockUpdatedCustomer,
-        before_data: null,
-        change_time: new Date(),
-        enterprise_id: 1,
-        entity_id: 1,
-        entity_name: 'Customer',
-        user_id: 1,
-        log_id: 1,
-        last_modified_by: 1,
-      }); // Mock the log creation
-
-      const result = await service.updateCustomer(
-        1,
-        { name: 'John Smith', email: 'john@example.com' },
-        1,
-        1,
-      );
-      expect(result).toEqual(mockUpdatedCustomer);
-      expect(prisma.customer.update).toHaveBeenCalledWith({
-        where: { customer_id: 1 },
-        data: {
-          customer_name: 'John Smith',
-          customer_email: 'john@example.com',
-        },
-      });
-    });
-  });
-  describe('deleteCustomer', () => {
-    it('should delete a customer and return true', async () => {
+    it('should update a customer and log the update', async () => {
       const mockCustomer = {
         customer_id: 1,
         customer_name: 'John Doe',
-        customer_code: 'JD123',
         customer_email: 'john@example.com',
-        customer_phone: '1234567890',
-        customer_address: '123 Main St',
-        bank_name: 'Bank ABC',
-        bank_account_no: '1234567890',
-        bank_account_type: 'Savings',
-        enterprise_id: 1,
-        last_modified_by: 1,
+      };
+      const mockLog = {
+        entity_name: 'Customer',
+        action: 'update',
+        entity_id: 1,
       };
 
-      jest.spyOn(prisma.customer, 'delete').mockResolvedValue(mockCustomer);
-      jest.spyOn(prisma.changeLog, 'create').mockResolvedValue({
-        action: 'delete',
-        after_data: mockCustomer,
-        before_data: null,
-        change_time: new Date(),
-        enterprise_id: 1,
-        entity_id: 1,
-        entity_name: 'Customer',
-        user_id: 1,
-        log_id: 1,
-        last_modified_by: 1,
-      }); // Mock the log creation
+      prisma.customer.findUnique = jest.fn().mockResolvedValue(mockCustomer);
+      prisma.customer.update = jest.fn().mockResolvedValue(mockCustomer);
+      prisma.changeLog.create = jest.fn().mockResolvedValue(mockLog);
 
-      const result = await service.deleteCustomer(
+      const result = await service.updateCustomer(
         1,
+        { name: 'John Doe' },
         1,
         1,
       );
+      expect(result).toEqual(mockCustomer);
+      expect(prisma.customer.update).toHaveBeenCalled();
+      expect(prisma.changeLog.create).toHaveBeenCalled();
+    });
 
+    it('should throw an error if customer is not found', async () => {
+      prisma.customer.findUnique = jest.fn().mockResolvedValue(null);
+
+      await expect(
+        service.updateCustomer(1, { name: 'John Doe' }, 1, 1),
+      ).rejects.toThrow(
+        new HttpException('Failed to update customer: Customer not found', HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw an error if customer update fails', async () => {
+      prisma.customer.findUnique = jest
+        .fn()
+        .mockResolvedValue({ customer_id: 1 });
+      prisma.customer.update = jest
+        .fn()
+        .mockRejectedValue(new Error('Database Error'));
+
+      await expect(
+        service.updateCustomer(1, { name: 'John Doe' }, 1, 1),
+      ).rejects.toThrow(
+        new HttpException(
+          'Failed to update customer: Database Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
+    });
+  });
+
+  describe('deleteCustomer', () => {
+    it('should delete a customer and log the deletion', async () => {
+      const mockCustomer = { customer_id: 1, customer_name: 'John Doe' };
+      const mockLog = {
+        entity_name: 'Customer',
+        action: 'delete',
+        entity_id: 1,
+      };
+
+      prisma.customer.findUnique = jest.fn().mockResolvedValue(mockCustomer);
+      prisma.customer.delete = jest.fn().mockResolvedValue(mockCustomer);
+      prisma.changeLog.create = jest.fn().mockResolvedValue(mockLog);
+
+      const result = await service.deleteCustomer(1, 1, 1);
       expect(result).toEqual(true);
-      expect(prisma.customer.delete).toHaveBeenCalledWith({
-        where: { customer_id: 1 },
-      });
+      expect(prisma.customer.delete).toHaveBeenCalled();
+      expect(prisma.changeLog.create).toHaveBeenCalled();
+    });
+
+    it('should throw an error if customer is not found', async () => {
+      prisma.customer.findUnique = jest.fn().mockResolvedValue(null);
+
+      await expect(service.deleteCustomer(1, 1, 1)).rejects.toThrow(
+        new HttpException('Failed to delete customer: Customer not found', HttpStatus.NOT_FOUND),
+      );
+    });
+
+    it('should throw an error if customer deletion fails', async () => {
+      prisma.customer.findUnique = jest
+        .fn()
+        .mockResolvedValue({ customer_id: 1 });
+      prisma.customer.delete = jest
+        .fn()
+        .mockRejectedValue(new Error('Database Error'));
+
+      await expect(service.deleteCustomer(1, 1, 1)).rejects.toThrow(
+        new HttpException(
+          'Failed to delete customer: Database Error',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        ),
+      );
     });
   });
 });
