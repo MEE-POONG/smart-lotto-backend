@@ -15,6 +15,10 @@ model User {
   password      String  @db.VarChar(255) /// The password hash for the user.
   refresh_token String? @db.VarChar(255) /// Optional refresh token for session management.
 
+  // Optional Enterprise relation
+  enterprise_id Int? /// Foreign key to the enterprise this user belongs to (nullable)
+  enterprise    Enterprise? @relation(fields: [enterprise_id], references: [enterprise_id]) /// Each user can optionally belong to one enterprise.
+
   // Relations
   customers  Customer[]  @relation("CustomerLastModifiedBy")
   orders     Order[]     @relation("OrderLastModifiedBy")
@@ -37,9 +41,10 @@ model Enterprise {
   customers  Customer[] /// One enterprise can have many customers.
   orders     Order[] /// One enterprise can have many orders.
   item_types ItemType[] /// One enterprise can have many item types.
-  OrderItem  OrderItem[]
-  QuickNote  QuickNote[]
-  ChangeLog  ChangeLog[]
+  orderItem  OrderItem[]
+  quickNote  QuickNote[]
+  changeLog  ChangeLog[]
+  user       User[]
 }
 
 /// The `Customer` model represents individual customers linked to a specific enterprise.
@@ -70,7 +75,7 @@ model Order {
   order_id         Int      @id @default(autoincrement()) /// Unique identifier for each order.
   customer_id      Int /// Foreign key relating to the customer who placed the order.
   total_price      Decimal  @db.Decimal(10, 2) /// The total price of the order.
-  order_date       DateTime /// The date and time the order was placed.
+  order_date       DateTime @default(now()) /// The date and time the order was placed.
   order_status     String   @default("Pending") @db.VarChar(20) /// The current status of the order (Pending, Shipped, Delivered).
   payment_status   String   @default("Unpaid") @db.VarChar(20) /// The payment status of the order (Paid, Unpaid).
   pay_slip_image   String?  @db.VarChar(255) /// The link or path to the payment slip image (nullable).

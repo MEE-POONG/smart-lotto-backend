@@ -27,7 +27,7 @@ export class AuthService {
 
   // Generate a JWT token
   async generateAccessToken(user: any): Promise<string> {
-    const payload = { userId: user.user_id, email: user.user_email };
+    const payload = { user_id: user.user_id, enterprise_id: user.enterprise_id, email: user.user_email };
     return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
   }
 
