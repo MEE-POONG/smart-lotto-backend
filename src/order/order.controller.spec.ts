@@ -54,15 +54,19 @@ describe('OrderController', () => {
     };
 
     const user: any = { user_id: 1, enterprise_id: 1 };
-
     // Mock the service's createOrder method to return the mockOrder
-    jest.spyOn(service, 'createOrder').mockResolvedValue(mockOrder);
+    jest.spyOn(service, 'createOrder').mockResolvedValue({
+      ...mockOrder,
+      gain_price: new Decimal(10) // Add missing gain_price field
+    });
 
     // Call the controller's create method
     const result = await controller.create(createOrderDto, user);
-
     // Assert that the result matches the mock order
-    expect(result).toEqual(mockOrder);
+    expect(result).toEqual({
+      ...mockOrder,
+      gain_price: new Decimal(10)
+    });
 
     // Ensure the service's createOrder method was called with the correct arguments
     expect(service.createOrder).toHaveBeenCalledWith(createOrderDto, 1, 1);
@@ -83,11 +87,34 @@ describe('OrderController', () => {
       },
     ];
 
-    jest.spyOn(service, 'findAllOrders').mockResolvedValue(mockOrders);
+    const mockOrdersWithRelations = mockOrders.map(order => ({
+      ...order,
+      customer: {
+        customer_id: order.customer_id,
+        enterprise_id: order.enterprise_id,
+        last_modified_by: order.last_modified_by,
+        customer_name: 'Test Customer',
+        customer_code: 'TC001',
+        customer_email: 'test@example.com',
+        customer_phone: '1234567890',
+        customer_address: 'Test Address',
+        bank_name: 'Test Bank',
+        bank_account_no: '1234567890',
+        bank_account_type: 'Savings'
+      },
+      order_items: []
+    }));
+
+    const mockOrdersWithRelationsAndGain = mockOrdersWithRelations.map(order => ({
+      ...order,
+      gain_price: new Decimal(10) // Add missing gain_price field
+    }));
+
+    jest.spyOn(service, 'findAllOrders').mockResolvedValue(mockOrdersWithRelationsAndGain);
 
     const result = await controller.findAll();
 
-    expect(result).toEqual(mockOrders);
+    expect(result).toEqual(mockOrdersWithRelationsAndGain);
     expect(service.findAllOrders).toHaveBeenCalled();
   });
 
@@ -104,11 +131,16 @@ describe('OrderController', () => {
       pay_slip_image: '',
     };
 
-    jest.spyOn(service, 'findOrderById').mockResolvedValue(mockOrder);
+    const mockOrderWithGain = {
+      ...mockOrder,
+      gain_price: new Decimal(10) // Add required gain_price field
+    };
+
+    jest.spyOn(service, 'findOrderById').mockResolvedValue(mockOrderWithGain);
 
     const result = await controller.findOne(1);
 
-    expect(result).toEqual(mockOrder);
+    expect(result).toEqual(mockOrderWithGain);
     expect(service.findOrderById).toHaveBeenCalledWith(1);
   });
 
@@ -140,11 +172,16 @@ describe('OrderController', () => {
 
     const user: any = { user_id: 1, enterprise_id: 1 };
 
-    jest.spyOn(service, 'updateOrder').mockResolvedValue(mockUpdatedOrder);
+    const updatedOrder = {
+      ...mockUpdatedOrder,
+      gain_price: new Decimal(50)
+    };
+
+    jest.spyOn(service, 'updateOrder').mockResolvedValue(updatedOrder);
 
     const result = await controller.update(1, updateOrderDto, user);
 
-    expect(result).toEqual(mockUpdatedOrder);
+    expect(result).toEqual(updatedOrder);
     expect(service.updateOrder).toHaveBeenCalledWith(1, updateOrderDto, 1, 1);
   });
 
