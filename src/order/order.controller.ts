@@ -21,9 +21,7 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  async create(@Body() createOrderDto: CreateOrderDto, @GetUser() user: User) {
-    console.log("user: ", user.user_id, user.enterprise_id);
-    
+  async create(@Body() createOrderDto: CreateOrderDto, @GetUser() user: User) {    
     return this.orderService.createOrder(createOrderDto, user.user_id, user.enterprise_id); // Example user and enterprise IDs
   }
 

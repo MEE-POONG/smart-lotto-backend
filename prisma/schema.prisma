@@ -26,10 +26,12 @@ model User {
   itemTypes  ItemType[]  @relation("ItemTypeLastModifiedBy")
   quickNotes QuickNote[] @relation("QuickNoteLastModifiedBy")
   changeLogs ChangeLog[] @relation("ChangeLogLastModifiedBy")
+  lotteries  Lottery[]   @relation("LotteryLastModifiedBy")
 
   // Timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Lottery   Lottery[]
 }
 
 /// The `Enterprise` model represents an individual enterprise (or tenant) in the system.
@@ -45,6 +47,7 @@ model Enterprise {
   quickNote  QuickNote[]
   changeLog  ChangeLog[]
   user       User[]
+  Lottery    Lottery[]
 }
 
 /// The `Customer` model represents individual customers linked to a specific enterprise.
@@ -75,6 +78,7 @@ model Order {
   order_id         Int      @id @default(autoincrement()) /// Unique identifier for each order.
   customer_id      Int /// Foreign key relating to the customer who placed the order.
   total_price      Decimal  @db.Decimal(10, 2) /// The total price of the order.
+  gain_price      Decimal?  @db.Decimal(10, 2) /// The total price of the order.
   order_date       DateTime @default(now()) /// The date and time the order was placed.
   order_status     String   @default("Pending") @db.VarChar(20) /// The current status of the order (Pending, Shipped, Delivered).
   payment_status   String   @default("Unpaid") @db.VarChar(20) /// The payment status of the order (Paid, Unpaid).
@@ -116,9 +120,11 @@ model ItemType {
   last_modified_by Int? /// Foreign key to the user who last modified this record.
 
   // Relations
-  order_items    OrderItem[] /// One item type can belong to multiple order items.
-  enterprise     Enterprise  @relation(fields: [enterprise_id], references: [enterprise_id]) /// Each item type belongs to one enterprise.
-  lastModifiedBy User?       @relation("ItemTypeLastModifiedBy", fields: [last_modified_by], references: [user_id]) /// User who last modified this record.
+  order_items       OrderItem[] /// One item type can belong to multiple order items.
+  enterprise        Enterprise  @relation(fields: [enterprise_id], references: [enterprise_id]) /// Each item type belongs to one enterprise.
+  lastModifiedBy    User?       @relation("ItemTypeLastModifiedBy", fields: [last_modified_by], references: [user_id]) /// User who last modified this record.
+  Lottery           Lottery?    @relation(fields: [lotteryLottery_id], references: [lottery_id])
+  lotteryLottery_id Int?
 }
 
 /// The `QuickNote` model represents a quick note associated with an order.
@@ -153,4 +159,21 @@ model ChangeLog {
   // Relations
   enterprise     Enterprise @relation(fields: [enterprise_id], references: [enterprise_id]) /// Each change log belongs to one enterprise.
   lastModifiedBy User?      @relation("ChangeLogLastModifiedBy", fields: [last_modified_by], references: [user_id]) /// User who last modified this record.
+}
+
+model Lottery {
+  lottery_id       Int      @id @default(autoincrement()) /// Unique identifier for each lottery.
+  lottery_name     String   @db.VarChar(100) /// The name of the lottery.
+  draw_date        DateTime /// The date of the lottery draw.
+  image_url        String?  @db.VarChar(255) /// The URL of the lottery image (nullable).
+  status           String   @default("Upcoming") @db.VarChar(20) /// Status of the lottery (e.g., Upcoming, Completed).
+  enterprise_id    Int /// Foreign key to the enterprise that owns this lottery.
+  last_modified_by Int? /// Foreign key to the user who last modified this record.
+
+  // Relations
+  enterprise     Enterprise @relation(fields: [enterprise_id], references: [enterprise_id]) /// Each lottery belongs to one enterprise.
+  itemTypes      ItemType[] /// One lottery can have multiple item types.
+  lastModifiedBy User?      @relation("LotteryLastModifiedBy", fields: [last_modified_by], references: [user_id])
+  User           User?      @relation(fields: [userUser_id], references: [user_id])
+  userUser_id    Int?
 }
