@@ -19,8 +19,22 @@ export class OrderItemService {
     }
   }
 
+  async createMany(data: OrderItemDto[]): Promise<number> {
+    try {
+      const result = await this.prisma.orderItem.createMany({ data });
+      return result.count;
+    } catch (error) {
+      throw new Error(`Failed to create order items: ${error.message}`);
+    }
+  }
+
   async findAll(): Promise<OrderItem[]> {
-    return this.prisma.orderItem.findMany();
+    return this.prisma.orderItem.findMany({
+      include: {
+        order: true,
+        item_type: true,
+      },
+    });
   }
 
   async findOne(id: number): Promise<OrderItem> {

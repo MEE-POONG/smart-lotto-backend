@@ -9,6 +9,12 @@ export class UserService {
     private authService: AuthService,
   ) {}
 
+  async getUserByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { user_email: email },
+    });
+  }
+
   async register(data: {
     user_name: string;
     user_email: string;

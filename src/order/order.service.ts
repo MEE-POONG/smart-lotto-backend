@@ -44,7 +44,16 @@ export class OrderService {
   // Find all orders
   async findAllOrders() {
     try {
-      return await this.prisma.order.findMany();
+      return await this.prisma.order.findMany({
+        include: {
+          customer: true,
+          order_items: {
+            include: {
+              item_type: true,
+            },
+          },
+        },
+      });
     } catch (error) {
       throw new Error(`Failed to retrieve orders: ${error.message}`);
     }

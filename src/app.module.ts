@@ -10,6 +10,7 @@ import { ItemTypeModule } from './item-type/item-type.module';
 import { OrderModule } from './order/order.module';
 import { QuickNoteModule } from './quick-note/quick-note.module';
 import { OrderItemModule } from './order-item/order-item.module';
+import { LotteryModule } from './lottery/lottery.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { OrderItemModule } from './order-item/order-item.module';
     OrderModule,
     QuickNoteModule,
     OrderItemModule,
+    LotteryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
